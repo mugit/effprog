@@ -50,7 +50,7 @@ struct hashnode {
 
 struct hashnode *ht[HASHSIZE];
 
-inline unsigned long hash(char *addr, size_t len)
+unsigned long hash(char *addr, size_t len)
 {
   /* assumptions: 1) unaligned accesses work 2) little-endian 3) 7 bytes
      beyond last byte can be accessed */
@@ -69,7 +69,7 @@ inline unsigned long hash(char *addr, size_t len)
   return x+(x>>64);
 }
 
-inline void insert(char *keyaddr, size_t keylen, int value)
+void insert(char *keyaddr, size_t keylen, int value)
 {
   struct hashnode **l=&ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
   struct hashnode *n = malloc(sizeof(struct hashnode));
@@ -80,7 +80,7 @@ inline void insert(char *keyaddr, size_t keylen, int value)
   *l = n;
 }
 
-inline int lookup(char *keyaddr, size_t keylen)
+int lookup(char *keyaddr, size_t keylen)
 {
   struct hashnode *l=ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
   while (l!=NULL) {
