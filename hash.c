@@ -42,7 +42,7 @@ struct block slurp(char *filename)
 #define HASHSIZE (1<<20)
 
 struct hashnode {
-  struct hashnode *next; /* link in external chaining */
+  //struct hashnode *next; /* link in external chaining */
   char *keyaddr;
   size_t keylen;
   int value;
@@ -73,7 +73,7 @@ void insert(char *keyaddr, size_t keylen, int value)
 {
   struct hashnode **l=&ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
   struct hashnode *n = malloc(sizeof(struct hashnode));
-  n->next = *l;
+  //n->next = *l;
   n->keyaddr = keyaddr;
   n->keylen = keylen;
   n->value = value;
@@ -83,11 +83,18 @@ void insert(char *keyaddr, size_t keylen, int value)
 int lookup(char *keyaddr, size_t keylen)
 {
   struct hashnode *l=ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
+  if (l != NULL) {
+	if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
+		return l->value;
+	}
+  }
+  /*
   while (l!=NULL) {
     if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen)==0)
       return l->value;
     l = l->next;
   }
+  */
   return -1;
 }
 
