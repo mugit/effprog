@@ -42,7 +42,6 @@ struct block slurp(char *filename)
 #define HASHSIZE (1<<20)
 
 struct hashnode {
-  //struct hashnode *next; /* link in external chaining */
   char *keyaddr;
   size_t keylen;
   int value;
@@ -73,7 +72,6 @@ void insert(char *keyaddr, size_t keylen, int value)
 {
   struct hashnode **l=&ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
   struct hashnode *n = malloc(sizeof(struct hashnode));
-  //n->next = *l;
   n->keyaddr = keyaddr;
   n->keylen = keylen;
   n->value = value;
@@ -88,13 +86,6 @@ int lookup(char *keyaddr, size_t keylen)
 		return l->value;
 	}
   }
-  /*
-  while (l!=NULL) {
-    if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen)==0)
-      return l->value;
-    l = l->next;
-  }
-  */
   return -1;
 }
 
@@ -137,18 +128,15 @@ int main(int argc, char *argv[])
     insert(p, nextp-p, i);
     p = nextp+1;
   }
-#if 0 
+#if 0
  struct hashnode *n;
-  unsigned long count, sumsq=0, sum=0;
-  for (i=0; i<HASHSIZE; i++) {
-    for (n=ht[i], count=0; n!=NULL; n=n->next)
-      count++;
-    sum += count;
-    sumsq += pow(count, 2);
+  unsigned long sum = 0;
+  for (i = 0; i < HASHSIZE; i++) {
+	if (ht[i] != NULL) {
+		sum++;
+	}
   }
-  printf("sum=%ld, sumsq=%ld, hashlen=%ld, chisq=%f\n",
-	 sum, sumsq, HASHSIZE, ((double)sumsq)*HASHSIZE/sum-sum);
-  /* expected value for chisq is ~HASHSIZE */
+  printf("sum=%ld, hashlen=%d\n", sum, HASHSIZE);
 #endif      
   for (i=0; i<10; i++) {
     for (p=input2.addr, endp=input2.addr+input2.len; p<endp; ) {
