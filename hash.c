@@ -38,7 +38,7 @@ struct block slurp(char *filename) {
 	return r;
 }
 
-#define HASHSIZE ((1<<20) - 1)
+#define HASHSIZE ((1<<21) - 1)
 
 struct hashnode {
 	char *keyaddr;
