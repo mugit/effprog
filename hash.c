@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 /* gcc specific */
 typedef unsigned int uint128_t __attribute__((__mode__(TI)));
@@ -45,11 +46,11 @@ struct hashnode {
   char *keyaddr;
   size_t keylen;
   int value;
-};
+} __attribute__((__packed__));
 
 struct hashnode *ht[HASHSIZE];
 
-unsigned long hash(char *addr, size_t len)
+inline unsigned long hash(char *addr, size_t len)
 {
   /* assumptions: 1) unaligned accesses work 2) little-endian 3) 7 bytes
      beyond last byte can be accessed */
@@ -68,7 +69,7 @@ unsigned long hash(char *addr, size_t len)
   return x+(x>>64);
 }
 
-void insert(char *keyaddr, size_t keylen, int value)
+inline void insert(char *keyaddr, size_t keylen, int value)
 {
   struct hashnode **l=&ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
   struct hashnode *n = malloc(sizeof(struct hashnode));
@@ -79,7 +80,7 @@ void insert(char *keyaddr, size_t keylen, int value)
   *l = n;
 }
 
-int lookup(char *keyaddr, size_t keylen)
+inline int lookup(char *keyaddr, size_t keylen)
 {
   struct hashnode *l=ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
   while (l!=NULL) {
@@ -136,7 +137,7 @@ int main(int argc, char *argv[])
     for (n=ht[i], count=0; n!=NULL; n=n->next)
       count++;
     sum += count;
-    sumsq += count*count;
+    sumsq += pow(count, 2);
   }
   printf("sum=%ld, sumsq=%ld, hashlen=%ld, chisq=%f\n",
 	 sum, sumsq, HASHSIZE, ((double)sumsq)*HASHSIZE/sum-sum);
