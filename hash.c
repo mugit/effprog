@@ -156,17 +156,31 @@ int main(int argc, char *argv[])
   printf("sum=%ld, sumsq=%ld, hashlen=%ld, chisq=%f\n",
 	 sum, sumsq, HASHSIZE, ((double)sumsq)*HASHSIZE/sum-sum);
   /* expected value for chisq is ~HASHSIZE */
-#endif      
-  for (i=0; i<10; i++) {
-    for (p=input2.addr, endp=input2.addr+input2.len; p<endp; ) {
-      nextp=memchr(p, '\n', endp-p);
-      if (nextp == NULL)
-        break;
-      r = ((unsigned long)r) * 2654435761L + lookup(p, nextp-p);
-      r = r + (r>>32);
-      p = nextp+1;
-    }
-  }
+#endif
+
+	int firstRun = 1;
+	int lookUps[HASHSIZE];
+	int currentLookup;
+	int lookupCount;
+
+	for (i=0; i<10; i++) {
+		for (p=input2.addr, endp=input2.addr+input2.len, lookupCount = 0; p<endp; lookupCount++) {
+			nextp=memchr(p, '\n', endp-p);
+			if (nextp == NULL) {
+				break;
+			}
+			if (firstRun) {
+				currentLookup = lookup(p, nextp - p);
+				lookUps[lookupCount] = currentLookup;
+				firstRun = 0;
+			} else {
+				currentLookup = lookUps[lookupCount];
+			}
+			r = ((unsigned long)r) * 2654435761L + currentLookup;
+			r = r + (r>>32);
+			p = nextp+1;
+		}
+	}
   printf("%ld\n",r);
   return 0;
 } 
