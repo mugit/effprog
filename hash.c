@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
                 currentLookup = lookup(p, nextp - p);
                 if (cacheCounter >= cacheSize) {
                     (void) realloc(cache, 100 * sizeof(int));
-                    cacheSize++;
+                    cacheSize += 100;
                 }
                 cache[cacheCounter] = currentLookup;
             } else {
