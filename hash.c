@@ -48,7 +48,6 @@ struct hashnode {
 };
 
 struct hashnode *ht[HASHSIZE];
-struct hashnode *ht2[HASHSIZE];
 
 unsigned long hash(char *addr, size_t len)
 {
@@ -69,40 +68,26 @@ unsigned long hash(char *addr, size_t len)
   return x+(x>>64);
 }
 
-void insert(char *keyaddr, size_t keylen, int value) {
-	struct hashnode **l=&ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
-	struct hashnode **l2=&ht2[hash(keyaddr, keylen) & (HASHSIZE-1)];
-	struct hashnode *n = malloc(sizeof(struct hashnode));
-	n->next = *l;
-	n->keyaddr = keyaddr;
-	n->keylen = keylen;
-	n->value = value;
-	*l = n;
-	*l2 = n;
+void insert(char *keyaddr, size_t keylen, int value)
+{
+  struct hashnode **l=&ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
+  struct hashnode *n = malloc(sizeof(struct hashnode));
+  n->next = *l;
+  n->keyaddr = keyaddr;
+  n->keylen = keylen;
+  n->value = value;
+  *l = n;
 }
 
-int lookup(char *keyaddr, size_t keylen) {
-	struct hashnode *l = ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
-	struct hashnode **l2 = &ht2[hash(keyaddr, keylen) & (HASHSIZE-1)];
-	int val2 = lookup2(keyaddr, keylen);
-	if (val2 > -1) {
-		return val2;
-	}
-	while (l != NULL) {
-		if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen)==0) {
-			*l2 = l;
-			return l->value;
-		}
-		l = l->next;
-	}
-	return -1;
-}
-
-int lookup2(char *keyaddr, size_t keylen) {
-	struct hashnode *l2 = ht2[hash(keyaddr, keylen) & (HASHSIZE-1)];
-	if (l2 != NULL && keylen == l2->keylen && memcmp(keyaddr, l2->keyaddr, keylen) == 0)
-		return l2->value;
-	return -1;
+int lookup(char *keyaddr, size_t keylen)
+{
+  struct hashnode *l=ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
+  while (l!=NULL) {
+    if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen)==0)
+      return l->value;
+    l = l->next;
+  }
+  return -1;
 }
 
 /*
@@ -156,31 +141,32 @@ int main(int argc, char *argv[])
   printf("sum=%ld, sumsq=%ld, hashlen=%ld, chisq=%f\n",
 	 sum, sumsq, HASHSIZE, ((double)sumsq)*HASHSIZE/sum-sum);
   /* expected value for chisq is ~HASHSIZE */
-#endif
-
-	int firstRun = 1;
+#endif    
+	
+    int firstRun = 1;
 	int lookUps[HASHSIZE];
 	int currentLookup;
 	int lookupCount;
 
-	for (i=0; i<10; i++) {
-		for (p=input2.addr, endp=input2.addr+input2.len, lookupCount = 0; p<endp; lookupCount++) {
-			nextp=memchr(p, '\n', endp-p);
-			if (nextp == NULL) {
-				break;
-			}
-			if (firstRun) {
-				currentLookup = lookup(p, nextp - p);
-				lookUps[lookupCount] = currentLookup;
-				firstRun = 0;
-			} else {
-				currentLookup = lookUps[lookupCount];
-			}
-			r = ((unsigned long)r) * 2654435761L + currentLookup;
-			r = r + (r>>32);
-			p = nextp+1;
-		}
-	}
-  printf("%ld\n",r);
-  return 0;
+    for (i=0; i<10; i++) {
+        for (p=input2.addr, endp=input2.addr+input2.len, lookupCount = 0; p<endp; lookupCount++) {
+            nextp=memchr(p, '\n', endp-p);
+            if (nextp == NULL) {
+                break;
+            }
+            if (firstRun) {
+                currentLookup = lookup(p, nextp - p);
+                lookUps[lookupCount] = currentLookup;
+                firstRun = 0;
+            } else {
+                currentLookup = lookUps[lookupCount];
+            }
+            r = ((unsigned long)r) * 2654435761L + currentLookup;
+            r = r + (r>>32);
+            p = nextp+1;
+        }
+    }
+
+    printf("%ld\n",r);
+    return 0;
 } 
