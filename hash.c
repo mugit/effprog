@@ -109,6 +109,11 @@ int main()
   return 0;
 }
 */  
+
+struct cachenode {
+    struct cachenode *next;
+    int value;
+};
       
 int main(int argc, char *argv[])
 {
@@ -144,27 +149,37 @@ int main(int argc, char *argv[])
 #endif    
 	
     int firstRun = 1;
-	int lookUps[HASHSIZE];
-	int currentLookup;
-	int lookupCount;
-
+    int currentLookup;
+    struct cachenode *first_cn = NULL;
+    struct cachenode *current_cn;
     for (i=0; i<10; i++) {
-        for (p=input2.addr, endp=input2.addr+input2.len, lookupCount = 0; p<endp; lookupCount++) {
+        current_cn = first_cn;
+        for (p=input2.addr, endp=input2.addr+input2.len; p<endp;) {
             nextp=memchr(p, '\n', endp-p);
             if (nextp == NULL) {
                 break;
             }
+
             if (firstRun) {
                 currentLookup = lookup(p, nextp - p);
-                lookUps[lookupCount] = currentLookup;
-                firstRun = 0;
+                if (first_cn == NULL) {
+                    first_cn = malloc(sizeof(struct cachenode));
+                    current_cn = first_cn;
+                } else {
+                    current_cn->next = malloc(sizeof(struct cachenode));
+                    current_cn = current_cn->next;
+                }
+                current_cn->next = NULL;
+                current_cn->value = currentLookup;
             } else {
-                currentLookup = lookUps[lookupCount];
+                currentLookup = current_cn->value;
+                current_cn = current_cn->next;
             }
             r = ((unsigned long)r) * 2654435761L + currentLookup;
             r = r + (r>>32);
             p = nextp+1;
         }
+        firstRun = 0;
     }
 
     printf("%ld\n",r);
