@@ -110,11 +110,6 @@ int main()
 }
 */  
 
-struct cachenode {
-    struct cachenode *next;
-    int value;
-};
-      
 int main(int argc, char *argv[])
 {
   struct block input1, input2;
@@ -150,31 +145,27 @@ int main(int argc, char *argv[])
 	
     int firstRun = 1;
     int currentLookup;
-    struct cachenode *first_cn = NULL;
-    struct cachenode *current_cn;
-    for (i=0; i<10; i++) {
-        current_cn = first_cn;
-        for (p=input2.addr, endp=input2.addr+input2.len; p<endp;) {
-            nextp=memchr(p, '\n', endp-p);
+    int *cache = calloc(HASHSIZE, sizeof(int));
+    int cacheSize = HASHSIZE;
+    int cacheCounter;
+    for (i = 0; i < 10; i++) {
+        for (p = input2.addr, endp = input2.addr + input2.len, cacheCounter = 0; p < endp; cacheCounter++) {
+            nextp = memchr(p, '\n', endp-p);
             if (nextp == NULL) {
                 break;
             }
 
             if (firstRun) {
                 currentLookup = lookup(p, nextp - p);
-                if (first_cn == NULL) {
-                    first_cn = malloc(sizeof(struct cachenode));
-                    current_cn = first_cn;
-                } else {
-                    current_cn->next = malloc(sizeof(struct cachenode));
-                    current_cn = current_cn->next;
+                if (cacheCounter >= cacheSize) {
+                    realloc(cache, sizeof(int));
+                    cacheSize++;
                 }
-                current_cn->next = NULL;
-                current_cn->value = currentLookup;
+                cache[cacheCounter] = currentLookup;
             } else {
-                currentLookup = current_cn->value;
-                current_cn = current_cn->next;
+                currentLookup = cache[cacheCounter];
             }
+
             r = ((unsigned long)r) * 2654435761L + currentLookup;
             r = r + (r>>32);
             p = nextp+1;
