@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
             r = ((unsigned long)r) * 2654435761L + currentLookup;
             r = r + (r>>32);
             p = nextp+1;
-	    }
+	}
     }
 
     printf("%ld\n",r);
