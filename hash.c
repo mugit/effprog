@@ -13,6 +13,8 @@ typedef unsigned int uint128_t __attribute__((__mode__(TI)));
 
 #define hashmult 13493690561280548289ULL
 /* #define hashmult 2654435761 */
+#define CACHE_ALLOC_STEP_SIZE 96
+#define HASHSIZE (1<<20)
 
 struct block {
     char *addr;
@@ -37,8 +39,6 @@ struct block slurp(char *filename) {
     return r;
 }
 
-#define HASHSIZE (1<<20)
-
 struct hashnode {
     struct hashnode *next; /* link in external chaining */
     char *keyaddr;
@@ -58,7 +58,7 @@ unsigned long hash(char *addr, size_t len) {
         x = (x + w)*hashmult;
     }
     if (i<len) {
-        shift = (i+8-len)*8;
+        shift = (i-len)*8 + 64;
         /* printf("len=%d, shift=%d\n",len, shift);*/
         w = (*(unsigned long *)(addr+i))<<shift;
         x = (x + w)*hashmult;
@@ -105,8 +105,6 @@ int main()
   return 0;
 }
 */  
-
-#define CACHE_ALLOC_STEP_SIZE 100
 
 int main(int argc, char *argv[]) {
     struct block input1, input2;
@@ -167,7 +165,7 @@ int main(int argc, char *argv[]) {
             r = ((unsigned long)r) * 2654435761L + currentLookup;
             r = r + (r>>32);
             p = nextp+1;
-        }
+	}
 	firstRun = 0;
     }
 
