@@ -17,7 +17,7 @@ typedef unsigned int uint128_t __attribute__((__mode__(TI)));
 struct block {
     char *addr;
     size_t len;
-} __attribute__ ((packed));
+} __attribute__((packed));
 
 struct block slurp(char *filename) {
     int fd=open(filename,O_RDONLY);
@@ -106,6 +106,8 @@ int main()
 }
 */  
 
+#define CACHE_ALLOC_STEP_SIZE 100
+
 int main(int argc, char *argv[]) {
     struct block input1, input2;
     char *p, *nextp, *endp;
@@ -153,8 +155,8 @@ int main(int argc, char *argv[]) {
             if (firstRun) {
                 currentLookup = lookup(p, nextp - p);
                 if (cacheCounter >= cacheSize) {
-                    cache = realloc(cache, 100 * sizeof(int));
-                    cacheSize += 100;
+                    cache = realloc(cache, CACHE_ALLOC_STEP_SIZE * sizeof(int));
+                    cacheSize += CACHE_ALLOC_STEP_SIZE;
                 }
                 cache[cacheCounter] = currentLookup;
             } else {
