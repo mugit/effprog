@@ -13,7 +13,8 @@
 typedef unsigned int uint128_t __attribute__((__mode__(TI)));
 
 #define hashmult 13493690561280548289ULL
-/* #define hashmult 2654435761 */
+#define CACHE_ALLOC_STEP_SIZE 96
+#define HASHSIZE (1<<20)
 
 struct block {
 	char *addr;
@@ -37,8 +38,6 @@ struct block slurp(char *filename) {
 	r.len = statbuf.st_size;
 	return r;
 }
-
-#define HASHSIZE (1<<20)
 
 struct hashnode {
 	char *keyaddr;
@@ -101,67 +100,69 @@ int lookup(char *keyaddr, size_t keylen) {
 	return -1;
 }
 
-/*
-int main()
-{
-  char a[40]="abcdefghijklmnopqrstuvwxyz1234567890";
-  char b[40]="abcdefghijklmnopqrstuvwxyz1234567890";
-
-  int i;
-  for (i=32; i>=0; i--) {
-    a[i] = '$';
-    b[i] = '%';
-    printf("%ld,%ld\n",hash(a,i),hash(b,i));
-    if (hash(a,i)!=hash(b,i)) {
-      fprintf(stderr, "hash error\n");
-      exit(1);
-    }
-  }
-  return 0;
-}
-*/  
-      
 int main(int argc, char *argv[]) {
-	struct block input1, input2;
-	char *p, *nextp, *endp;
-	unsigned int i;
-	unsigned long r=0;
-	if (argc!=3) {
-		fprintf(stderr, "usage: %s <dict-file> <lookup-file>\n", argv[0]);
-		exit(1);
-	}
+    struct block input1, input2;
+    char *p, *nextp, *endp;
+    unsigned int i;
+    unsigned long r = 0;
+    int currentLookup;
+    int *cache;
+    int cacheSize = HASHSIZE;
+    int cacheCounter;
 
-	memset(ht, 0, HASHSIZE);
+    if (argc!=3) {
+        fprintf(stderr, "usage: %s <dict-file> <lookup-file>\n", argv[0]);
+        exit(1);
+    }
+    input1 = slurp(argv[1]);
+    input2 = slurp(argv[2]);
+    for (p=input1.addr, endp=input1.addr+input1.len, i=0; p<endp; i++) {
+        nextp=memchr(p, '\n', endp-p);
+        if (nextp == NULL)
+            break;
+        insert(p, nextp-p, i);
+        p = nextp+1;
+    }
 
-	input1 = slurp(argv[1]);
-	input2 = slurp(argv[2]);
-	for (p=input1.addr, endp=input1.addr+input1.len, i=0; p<endp; i++) {
-		nextp=memchr(p, '\n', endp-p);
-		if (nextp == NULL)
-			break;
-		insert(p, nextp-p, i);
-		p = nextp+1;
-	}
-#if 1
-	struct hashnode *n;
-	unsigned long sum = 0;
-	for (i = 0; i < HASHSIZE; i++) {
-		if (ht[i] != NULL) {
-			sum++;
-		}
-	}
-	printf("sum=%ld, hashlen=%d\n", sum, HASHSIZE);
-#endif      
-	for (i=0; i<10; i++) {
-		for (p=input2.addr, endp=input2.addr+input2.len; p<endp; ) {
-			nextp=memchr(p, '\n', endp-p);
-			if (nextp == NULL)
-				break;
-			r = ((unsigned long)r) * 2654435761L + lookup(p, nextp-p);
-			r = r + (r>>32);
-			p = nextp+1;
-		}
-	}
-	printf("%ld\n",r);
-	return 0;
+#if 0 
+    struct hashnode *n;
+    unsigned long count, sumsq=0, sum=0;
+    for (i=0; i<HASHSIZE; i++) {
+        for (n=ht[i], count=0; n!=NULL; n=n->next)
+            count++;
+        sum += count;
+        sumsq += count*count;
+    }
+    printf("sum=%ld, sumsq=%ld, hashlen=%ld, chisq=%f\n",
+        sum, sumsq, HASHSIZE, ((double)sumsq)*HASHSIZE/sum-sum);
+    /* expected value for chisq is ~HASHSIZE */
+#endif    
+
+    cache = calloc(HASHSIZE, sizeof(int));
+    for (i = 0; i < 10; i++) {
+        for (p = input2.addr, endp = input2.addr + input2.len, cacheCounter = 0; p < endp; cacheCounter++) {
+            nextp = memchr(p, '\n', endp-p);
+            if (nextp == NULL) {
+                break;
+            }
+
+            if (i == 0) {
+                currentLookup = lookup(p, nextp - p);
+                if (cacheCounter >= cacheSize) {
+                    cache = realloc(cache, CACHE_ALLOC_STEP_SIZE * sizeof(int));
+                    cacheSize += CACHE_ALLOC_STEP_SIZE;
+                }
+                cache[cacheCounter] = currentLookup;
+            } else {
+                currentLookup = cache[cacheCounter];
+            }
+
+            r = ((unsigned long)r) * 2654435761L + currentLookup;
+            r = r + (r>>32);
+            p = nextp+1;
+        }
+    }
+
+    printf("%ld\n",r);
+    return 0;
 } 
