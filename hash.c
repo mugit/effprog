@@ -38,7 +38,7 @@ struct block slurp(char *filename) {
 	return r;
 }
 
-#define HASHSIZE ((1<<21) - 1)
+#define HASHSIZE (1<<20)
 
 struct hashnode {
 	char *keyaddr;
@@ -84,20 +84,17 @@ void insert(char *keyaddr, size_t keylen, int value) {
 
 int lookup(char *keyaddr, size_t keylen) {
 	int position = hash(keyaddr, keylen) & (HASHSIZE-1);
-	struct hashnode *l;
-
-	l = ht[position];
+	struct hashnode *l = ht[position];
 	while (l != NULL) {
 		if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
 			return l->value;
 		}
-		if (position <= HASHSIZE) {
+		if (position < HASHSIZE - 1) {
 			l = ht[++position];
 		} else {
 			break;
 		}
 	}
-
 	return -1;
 }
 
