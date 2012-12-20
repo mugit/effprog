@@ -31,7 +31,7 @@ extendedchars=true}
 struct hashnode {
   char *keyaddr;
   size_t keylen;
-	int value;
+  int value;
 } __attribute__((__packed__));
 \end{lstlisting}}
 
@@ -71,6 +71,21 @@ while (l != NULL) {
 		break;
 }	
 \end{lstlisting}}
+
+	% Schritt 5
+	\defverbatim[colored]\sFive{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+int firstRun = 1; int lookUps[HASHSIZE];
+int currentLookup; int lookupCount;
+if (firstRun) {
+	currentLookup = lookup(p, nextp - p);
+	lookUps[lookupCount] = currentLookup;
+	firstRun = 0;
+} else {
+	currentLookup = lookUps[lookupCount];
+}
+\end{lstlisting}}
+	
 
 	\begin{frame}
 	\titlepage
@@ -113,6 +128,14 @@ while (l != NULL) {
   	\sFourTwo
   	next-Pointer wurden entfernt, stattdessen wurde lineares Sondieren implementiert.
   	Verschlechterung $\Rightarrow$ \fail{zur\"ucksetzen}.  
+  \end{frame}
+  
+  \begin{frame}
+  	\frametitle{Schritt 5}
+  	\framesubtitle{Caching f\"ur Lookups in Main}
+  	\sFive
+  	
+  	Starke Verbesserung $\Rightarrow$ \success{beibehalten}.
   \end{frame}
   
 \end{document}
