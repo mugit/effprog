@@ -12,7 +12,6 @@
 typedef unsigned int uint128_t __attribute__((__mode__(TI)));
 
 #define hashmult 13493690561280548289ULL
-/* #define hashmult 2654435761 */
 #define CACHE_ALLOC_STEP_SIZE 96
 #define HASHSIZE (1<<20)
 
