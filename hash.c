@@ -67,11 +67,13 @@ unsigned long hash(char *addr, size_t len) {
 }
 
 void insert(char *keyaddr, size_t keylen, int value) {
-	int position = hash(keyaddr, keylen) & (HASHSIZE-1);
-	struct hashnode **l = &ht[position++];
-    while (*l != NULL && position < HASHSIZE) {
-        l = &ht[position++];
-    }
+	struct hashnode **l;
+	int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
+    int position = startPosition;
+    do {
+        l = &ht[position];
+        position = (position + 1) % HASHSIZE;
+    } while(*l != NULL && position != startPosition);
 
 	if (*l == NULL) {
 		struct hashnode *n = malloc(sizeof(struct hashnode));
