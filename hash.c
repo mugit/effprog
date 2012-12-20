@@ -58,7 +58,7 @@ unsigned long hash(char *addr, size_t len) {
         x = (x + w)*hashmult;
     }
     if (i<len) {
-        shift = (i-len)*8 + 64;
+        shift = ((i-len) << 3) + 64;
         /* printf("len=%d, shift=%d\n",len, shift);*/
         w = (*(unsigned long *)(addr+i))<<shift;
         x = (x + w)*hashmult;
