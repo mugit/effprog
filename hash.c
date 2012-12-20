@@ -110,10 +110,9 @@ int main(int argc, char *argv[]) {
     struct block input1, input2;
     char *p, *nextp, *endp;
     unsigned int i;
-    unsigned long r=0;
-    int firstRun = 1;
+    unsigned long r = 0;
     int currentLookup;
-    int *cache = calloc(HASHSIZE, sizeof(int));
+    int *cache;
     int cacheSize = HASHSIZE;
     int cacheCounter;
 
@@ -130,6 +129,7 @@ int main(int argc, char *argv[]) {
         insert(p, nextp-p, i);
         p = nextp+1;
     }
+
 #if 0 
     struct hashnode *n;
     unsigned long count, sumsq=0, sum=0;
@@ -144,6 +144,7 @@ int main(int argc, char *argv[]) {
     /* expected value for chisq is ~HASHSIZE */
 #endif    
 	
+    cache = calloc(HASHSIZE, sizeof(int));
     for (i = 0; i < 10; i++) {
         for (p = input2.addr, endp = input2.addr + input2.len, cacheCounter = 0; p < endp; cacheCounter++) {
             nextp = memchr(p, '\n', endp-p);
@@ -151,7 +152,7 @@ int main(int argc, char *argv[]) {
                 break;
             }
 
-            if (firstRun) {
+            if (i == 0) {
                 currentLookup = lookup(p, nextp - p);
                 if (cacheCounter >= cacheSize) {
                     cache = realloc(cache, CACHE_ALLOC_STEP_SIZE * sizeof(int));
@@ -165,8 +166,7 @@ int main(int argc, char *argv[]) {
             r = ((unsigned long)r) * 2654435761L + currentLookup;
             r = r + (r>>32);
             p = nextp+1;
-	}
-	firstRun = 0;
+	    }
     }
 
     printf("%ld\n",r);
