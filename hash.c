@@ -86,26 +86,6 @@ int lookup(char *keyaddr, size_t keylen) {
     return -1;
 }
 
-/*
-int main()
-{
-  char a[40]="abcdefghijklmnopqrstuvwxyz1234567890";
-  char b[40]="abcdefghijklmnopqrstuvwxyz1234567890";
-
-  int i;
-  for (i=32; i>=0; i--) {
-    a[i] = '$';
-    b[i] = '%';
-    printf("%ld,%ld\n",hash(a,i),hash(b,i));
-    if (hash(a,i)!=hash(b,i)) {
-      fprintf(stderr, "hash error\n");
-      exit(1);
-    }
-  }
-  return 0;
-}
-*/  
-
 int main(int argc, char *argv[]) {
     struct block input1, input2;
     char *p, *nextp, *endp;
