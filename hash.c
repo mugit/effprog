@@ -85,18 +85,19 @@ void insert(char *keyaddr, size_t keylen, int value) {
 }
 
 int lookup(char *keyaddr, size_t keylen) {
-	int position = hash(keyaddr, keylen) & (HASHSIZE-1);
-	struct hashnode *l = ht[position];
-	while (l != NULL) {
-		if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
+	int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
+    int position = startPosition;
+	struct hashnode *l;
+    do {
+        l = ht[position];
+        if (l == NULL) {
+            break;
+        }
+        if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
 			return l->value;
 		}
-		if (position < HASHSIZE - 1) {
-			l = ht[++position];
-		} else {
-			break;
-		}
-	}
+        position = (position + 1) % HASHSIZE;
+    } while(position != startPosition);
 	return -1;
 }
 
