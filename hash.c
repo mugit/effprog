@@ -113,6 +113,12 @@ int main(int argc, char *argv[]) {
     char *p, *nextp, *endp;
     unsigned int i;
     unsigned long r=0;
+    int firstRun = 1;
+    int currentLookup;
+    int *cache = calloc(HASHSIZE, sizeof(int));
+    int cacheSize = HASHSIZE;
+    int cacheCounter;
+
     if (argc!=3) {
         fprintf(stderr, "usage: %s <dict-file> <lookup-file>\n", argv[0]);
         exit(1);
@@ -140,11 +146,6 @@ int main(int argc, char *argv[]) {
     /* expected value for chisq is ~HASHSIZE */
 #endif    
 	
-    int firstRun = 1;
-    int currentLookup;
-    int *cache = calloc(HASHSIZE, sizeof(int));
-    int cacheSize = HASHSIZE;
-    int cacheCounter;
     for (i = 0; i < 10; i++) {
         for (p = input2.addr, endp = input2.addr + input2.len, cacheCounter = 0; p < endp; cacheCounter++) {
             nextp = memchr(p, '\n', endp-p);
@@ -167,7 +168,7 @@ int main(int argc, char *argv[]) {
             r = r + (r>>32);
             p = nextp+1;
         }
-        firstRun = 0;
+	firstRun = 0;
     }
 
     printf("%ld\n",r);
