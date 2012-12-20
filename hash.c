@@ -17,7 +17,7 @@ typedef unsigned int uint128_t __attribute__((__mode__(TI)));
 struct block {
     char *addr;
     size_t len;
-};
+} __attribute__((packed));
 
 struct block slurp(char *filename) {
     int fd=open(filename,O_RDONLY);
@@ -44,7 +44,7 @@ struct hashnode {
   char *keyaddr;
   size_t keylen;
   int value;
-};
+} __attribute__((packed));
 
 struct hashnode *ht[HASHSIZE];
 
