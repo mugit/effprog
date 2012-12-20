@@ -17,6 +17,9 @@ tabsize=3,
 showstringspaces=false,
 extendedchars=true}
 
+\newcommand{\success}[1]{\textcolor{green}{#1}}
+\newcommand{\fail}[1]{\textcolor{red}{#1}}
+
 \begin{document}
 
 	% Schritt 1
@@ -52,7 +55,7 @@ struct hashnode *next; /* link ext. chaining */
 \end{lstlisting}}
 
 \defverbatim[colored]\sFourTwo{%
-\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily\footnotesize]
 int position = hash(keyaddr, keylen) & (HASHSIZE-1);
 struct hashnode *l; l = ht[position];
 while (l != NULL) {
@@ -79,7 +82,7 @@ while (l != NULL) {
     \frametitle{Schritt 1}
     \framesubtitle{Vermeidung von Speicherframentierung}
 		\sOne
-		Geringe Verbesserung $\Rightarrow$ beibehalten.
+		Geringe Verbesserung $\Rightarrow$ \success{beibehalten}.
   \end{frame}  
   
   \begin{frame}
@@ -88,7 +91,7 @@ while (l != NULL) {
   	\sTwoOne
   	ersetzt durch\\[1em]
   	\sTwoTwo
-  	Verwendung der math-Library (math.h), geringe Verbesserung $\Rightarrow$ beibehalten.
+  	Verwendung der math-Library (math.h), geringe Verbesserung $\Rightarrow$ \success{beibehalten}.
   \end{frame}	
   
   \begin{frame}
@@ -96,7 +99,7 @@ while (l != NULL) {
   	\framesubtitle{Inline Funktionen}
   	\sThree
   	inlining bei den Funktionen.
-  	Keine Verbesserung $\Rightarrow$ entfernt.
+  	Keine Verbesserung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
   
   \begin{frame}
@@ -106,7 +109,7 @@ while (l != NULL) {
   	Hinzugabe von \textbf{linearem Sondieren}:\\[1em]
   	\sFourTwo
   	next-Pointer wurden entfernt, stattdessen wurde lineares Sondieren implementiert.
-  	Verschlechterung $\Rightarrow$ zur\"ucksetzen.  
+  	Verschlechterung $\Rightarrow$ \fail{zur\"ucksetzen}.  
   \end{frame}
   
 \end{document}
