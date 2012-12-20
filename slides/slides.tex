@@ -1,0 +1,113 @@
+\documentclass{beamer}
+\usepackage{listings}
+
+\title[Effprog]%(optional, only for long titles)
+{185.190 Effiziente Programme}
+\subtitle{Aufgabe: Hash-Tabelle}
+\author[Author, Anders] % (optional, for multiple authors)
+{Berger G., Hotz-Behofsits C., Reisinger M., Schmidleithner T.}
+\date{WS12/13}
+\subject{Informatik}
+
+\lstset{breakatwhitespace,
+language=C,
+columns=fullflexible,
+keepspaces,
+breaklines,
+tabsize=3, 
+showstringspaces=false,
+extendedchars=true}
+
+\begin{document}
+
+	% Schritt 1
+	\defverbatim[colored]\sOne{%
+\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily]
+struct hashnode {
+  char *keyaddr;
+  size_t keylen;
+	int value;
+} __attribute__((__packed__));
+\end{lstlisting}}
+
+	% Schritt 2
+	\defverbatim[colored]\sTwoOne{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+sumsq += count*count;
+\end{lstlisting}}
+	\defverbatim[colored]\sTwoTwo{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+sumsq += pow(count, 2);
+\end{lstlisting}}
+
+	% Schritt 3
+	\defverbatim[colored]\sThree{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+inline unsigned long hash(char *addr, size_t len)
+\end{lstlisting}}
+
+	% Schritt 4
+	\defverbatim[colored]\sFourOne{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+struct hashnode *next; /* link ext. chaining */
+\end{lstlisting}}
+
+\defverbatim[colored]\sFourTwo{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+int position = hash(keyaddr, keylen) & (HASHSIZE-1);
+struct hashnode *l; l = ht[position];
+while (l != NULL) {
+	if (keylen == l->keylen &&
+		memcmp(keyaddr, l->keyaddr, keylen) == 0)
+		return l->value;
+	if (position <= HASHSIZE)
+		l = ht[++position];
+	else
+		break;
+}	
+\end{lstlisting}}
+
+	\begin{frame}
+	\titlepage
+	\end{frame}
+
+  \begin{frame}
+    \frametitle{Ausgangssituation}
+    % TODO
+  \end{frame}
+  
+  \begin{frame}
+    \frametitle{Schritt 1}
+    \framesubtitle{Vermeidung von Speicherframentierung}
+		\sOne
+		Geringe Verbesserung $\Rightarrow$ beibehalten.
+  \end{frame}  
+  
+  \begin{frame}
+  	\frametitle{Schritt 2}
+  	\framesubtitle{Math-Library}
+  	\sTwoOne
+  	ersetzt durch\\[1em]
+  	\sTwoTwo
+  	Verwendung der math-Library (math.h), geringe Verbesserung $\Rightarrow$ beibehalten.
+  \end{frame}	
+  
+  \begin{frame}
+  	\frametitle{Schritt 3}
+  	\framesubtitle{Inline Funktionen}
+  	\sThree
+  	inlining bei den Funktionen.
+  	Keine Verbesserung $\Rightarrow$ entfernt.
+  \end{frame}
+  
+  \begin{frame}
+  	\frametitle{Schritt 4}
+  	\framesubtitle{Entfernen der next-Pointer}
+  	\sFourOne
+  	Hinzugabe von \textbf{linearem Sondieren}:\\[1em]
+  	\sFourTwo
+  	next-Pointer wurden entfernt, stattdessen wurde lineares Sondieren implementiert.
+  	Verschlechterung $\Rightarrow$ zur\"ucksetzen.  
+  \end{frame}
+  
+\end{document}
