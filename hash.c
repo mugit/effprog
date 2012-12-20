@@ -50,23 +50,23 @@ struct hashnode *ht[HASHSIZE];
 unsigned long hash(char *addr, size_t len) {
     /* assumptions: 1) unaligned accesses work 2) little-endian 3) 7 bytes
        beyond last byte can be accessed */
-    uint128_t x=0, w;
+    uint128_t x = 0, w;
     size_t i, shift;
-    for (i=0; i+7<len; i+=8) {
+    for (i = 0; i + 7 < len; i += 8) {
         w = *(unsigned long *)(addr+i);
         x = (x + w)*hashmult;
     }
-    if (i<len) {
-        shift = ((i-len) << 3) + 64;
+    if (i < len) {
+        shift = ((i - len) << 3) + 64;
         /* printf("len=%d, shift=%d\n",len, shift);*/
-        w = (*(unsigned long *)(addr+i))<<shift;
+        w = (*(unsigned long *)(addr + i)) << shift;
         x = (x + w)*hashmult;
     }
     return x+(x>>64);
 }
 
 void insert(char *keyaddr, size_t keylen, int value) {
-    struct hashnode **l=&ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
+    struct hashnode **l = &ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
     struct hashnode *n = malloc(sizeof(struct hashnode));
     n->next = *l;
     n->keyaddr = keyaddr;
@@ -76,9 +76,9 @@ void insert(char *keyaddr, size_t keylen, int value) {
 }
 
 int lookup(char *keyaddr, size_t keylen) {
-    struct hashnode *l=ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
+    struct hashnode *l = ht[hash(keyaddr, keylen) & (HASHSIZE-1)];
     while (l!=NULL) {
-        if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen)==0)
+        if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0)
             return l->value;
         l = l->next;
     }
