@@ -24,31 +24,89 @@ extendedchars=true}
 \newcommand{\fail}[1]{\textcolor{red}{#1}}
 
 \begin{document}
+	% Inlining
+	\defverbatim[colored]\sInlining{%
+\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily]
+inline unsigned long hash(char *addr, size_t len);
+inline void insert(char *keyaddr, size_t keylen, int value);
+inline int lookup(char *keyaddr, size_t keylen);
+\end{lstlisting}}
 
-	% Schritt 1
-	\defverbatim[colored]\sOne{%
+	% Lineares Sondieren
+	\defverbatim[colored]\sLinear{%
+\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]
+void insert(char *keyaddr, size_t keylen, int value) {
+    struct hashnode **l;
+    int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
+    int position = startPosition;
+    do {
+        l = &ht[position];
+        position = (position + 1) % HASHSIZE;
+    } while(*l != NULL && position != startPosition);
+
+    if (*l == NULL) {
+        struct hashnode *n = malloc(sizeof(struct hashnode));
+        n->keyaddr = keyaddr;
+        n->keylen = keylen;
+        n->value = value;
+        *l = n;
+    }
+}
+\end{lstlisting}}
+
+	% Quadratisches Sondieren
+\defverbatim[colored]\sQuadratOne{%
+\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]	
+void insert(char *keyaddr, size_t keylen, int value) {
+    struct hashnode **l;
+    int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
+    int position = startPosition; int i = 0;
+    do {
+        l = &ht[position];
+        position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
+        i++;
+    } while(*l != NULL && position != startPosition);
+
+    if (*l == NULL) {
+        struct hashnode *n = malloc(sizeof(struct hashnode));
+        n->keyaddr = keyaddr;
+        n->keylen = keylen;
+        n->value = value;
+        *l = n;
+    }
+}
+\end{lstlisting}}	
+
+\defverbatim[colored]\sQuadratTwo{%
+\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]	
+int lookup(char *keyaddr, size_t keylen) {
+    int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
+    int position = startPosition;
+    struct hashnode *l;
+    int i = 0;
+    do {
+        l = ht[position];
+        if (l == NULL) {
+            break;
+        }
+        if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
+            return l->value;
+        }
+        position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
+        i++;
+    } while(position != startPosition);
+    return -1;
+}
+\end{lstlisting}}	
+
+	% Packed
+	\defverbatim[colored]\sPacked{%
 \begin{lstlisting}[tabsize=8,basicstyle=\ttfamily]
 struct hashnode {
   char *keyaddr;
   size_t keylen;
   int value;
 } __attribute__((__packed__));
-\end{lstlisting}}
-
-	% Schritt 2
-	\defverbatim[colored]\sTwoOne{%
-\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
-sumsq += count*count;
-\end{lstlisting}}
-	\defverbatim[colored]\sTwoTwo{%
-\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
-sumsq += pow(count, 2);
-\end{lstlisting}}
-
-	% Schritt 3
-	\defverbatim[colored]\sThree{%
-\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
-inline unsigned long hash(char *addr, size_t len)
 \end{lstlisting}}
 
 	% Schritt 4
@@ -65,27 +123,12 @@ while (l != NULL) {
 	if (keylen == l->keylen &&
 		memcmp(keyaddr, l->keyaddr, keylen) == 0)
 		return l->value;
-	if (position <= HASHSIZE)
+	if (position < HASHSIZE - 1)
 		l = ht[++position];
 	else
 		break;
 }	
-\end{lstlisting}}
-
-	% Schritt 5
-	\defverbatim[colored]\sFive{%
-\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
-int firstRun = 1; int lookUps[HASHSIZE];
-int currentLookup; int lookupCount;
-if (firstRun) {
-	currentLookup = lookup(p, nextp - p);
-	lookUps[lookupCount] = currentLookup;
-	firstRun = 0;
-} else {
-	currentLookup = lookUps[lookupCount];
-}
-\end{lstlisting}}
-	
+\end{lstlisting}}	
 
 	\begin{frame}
 	\titlepage
@@ -93,49 +136,167 @@ if (firstRun) {
 
   \begin{frame}
     \frametitle{Ausgangssituation}
-    % TODO
-  \end{frame}
+		
+	\begin{itemize}
+		\item Testaufruf:
+		\begin{itemize}
+			\item gcc -lm hash.c -o hash
+      \item perf stat -e cycles,cache-misses,branch-misses,instructions ./hash input input2
+     \end{itemize}
+		\item Ergebnis:
+		\begin{itemize}
+			\item Cycles: 6,156,600,783\\
+			\item Instructions:  1,939,017,297\\
+			\item Cache-misses:  37,721,251\\
+			\item Branch mispredictions: 18,758,092\\
+		\end{itemize}		
+		\item Testrechner:
+		\begin{itemize}
+			\item Intel Core i5-2520M CPU @ 2.50GHz
+			\item Cache-size:
+			\begin{itemize}
+				\item Lvl 3: 3072 KB
+				\item Lvl 2: 512 KB
+				\item Lvl 1: 128 KB
+			\end{itemize}
+			\item RAM: 4GB DDR-3
+		\end{itemize}
+	\end{itemize}
+	\end{frame}
   
   \begin{frame}
-    \frametitle{Schritt 1}
-    \framesubtitle{Vermeidung von Speicherframentierung}
-		\sOne
-		Geringe Verbesserung $\Rightarrow$ \success{beibehalten}.
-  \end{frame}  
+  	\frametitle{Schritt 1}
+  	gcc -O3 -lm hash.c -o hash\\[1em]
+  	\textbf{Vorher:}
+  	\begin{itemize}
+			\item Cycles: 6,156,600,783\\
+			\item Instructions: 1,939,017,297\\
+			\item Cache-misses: 37,721,251\\
+			\item Branch mispredictions: 18,758,092\\
+		\end{itemize}	
+		
+		\textbf{Nachher:}
+  	\begin{itemize}
+			\item Cycles: 3,705,108,800 (\success{+ 39,82})\\
+			\item Instructions: 1,158,823,277 (\success{+ 40,24})\\
+			\item Cache-misses: 37,394,499 (\success{+ 0,87})\\
+			\item Branch mispredictions: 20,203,186 (\fail{- 7,70})\\
+		\end{itemize}	
+  \end{frame}
   
   \begin{frame}
   	\frametitle{Schritt 2}
-  	\framesubtitle{Math-Library}
-  	\sTwoOne
-  	ersetzt durch\\[1em]
-  	\sTwoTwo
-  	Verwendung der math-Library (math.h), geringe Verbesserung $\Rightarrow$ \success{beibehalten}.
-  \end{frame}	
+		\framesubtitle{Inlining}
+  	\textbf{Vorher:}
+  	\begin{itemize}
+			\item Cycles: 3,705,108,800 \\
+			\item Instructions: 1,158,823,277\\
+			\item Cache-misses: 37,394,499\\
+			\item Branch mispredictions: 20,203,186\\
+		\end{itemize}	
+				
+		\textbf{Nachher:}
+  	\begin{itemize}
+			\item Cycles: 3,995,922,639 (\fail{- 7,85})\\
+			\item Instructions:  1,158,154,470 (\success{+ 0,06})\\
+			\item Cache-misses: 37,389,502 (\success{+ 0,01})\\
+			\item Branch mispredictions: 20,691,809 (\fail{- 2,42})\\
+		\end{itemize}			
+		Keine Verbesserung $\Rightarrow$ \fail{entfernt}.
+  \end{frame}
+  
+    \begin{frame}
+  	\frametitle{Code: Schritt 2}
+		\framesubtitle{Inlining}
+		\sInlining	
+  \end{frame}
+  
   
   \begin{frame}
   	\frametitle{Schritt 3}
-  	\framesubtitle{Inline Funktionen}
-  	\sThree
-  	inlining bei den Funktionen.
-  	Keine Verbesserung $\Rightarrow$ \fail{entfernt}.
+  	\framesubtitle{Packed}
+  	\textbf{Vorher:}
+  	\begin{itemize}
+			\item Cycles: 3,705,108,800 \\
+			\item Instructions: 1,158,823,277\\
+			\item Cache-misses: 37,394,499\\
+			\item Branch mispredictions: 20,203,186\\
+		\end{itemize}	
+		
+		\textbf{Nachher:}
+		\begin{itemize}
+			\item Cycles: 3,760,116,819 (\fail{- 1,48})\\
+			\item Instructions: 1,158,688,286 (\success{+ 0,01})\\
+			\item Cache-misses: 37,372,930 (\success{+ 0,06})\\
+			\item Branch mispredictions: 19,799,458 (\success{+ 2,0})\\
+		\end{itemize}	
+		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
   
+    \begin{frame}
+  	\frametitle{Code: Schritt 3}
+  	\framesubtitle{Packed}
+		\sPacked
+  \end{frame}
+    
   \begin{frame}
   	\frametitle{Schritt 4}
-  	\framesubtitle{Entfernen der next-Pointer}
-  	\sFourOne
-  	Hinzugabe von \textbf{linearem Sondieren}:\\[1em]
-  	\sFourTwo
-  	next-Pointer wurden entfernt, stattdessen wurde lineares Sondieren implementiert.
-  	Verschlechterung $\Rightarrow$ \fail{zur\"ucksetzen}.  
+  	\framesubtitle{Lineares Sondieren}
+  	\textbf{Vorher:}
+  	\begin{itemize}
+			\item Cycles: 3,705,108,800 \\
+			\item Instructions: 1,158,823,277\\
+			\item Cache-misses: 37,394,499\\
+			\item Branch mispredictions: 20,203,186\\
+		\end{itemize}	
+		
+		\textbf{Nachher:}
+		\begin{itemize}
+			\item Cycles: 4,588,844,030 (\fail{- 23,85})\\
+			\item Instructions: 1,315,414,647 (\fail{- 13,51})\\
+			\item Cache-misses: 58,530,839 (\fail{- 56,52})\\
+			\item Branch mispredictions: 25,859,851 (\fail{- 28,00})\\
+		\end{itemize}	
+		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
   
   \begin{frame}
+  	\frametitle{Code: Schritt 4}
+  	\framesubtitle{Lineares Sondieren}
+		\sLinear
+  \end{frame}
+    
+  \begin{frame}
   	\frametitle{Schritt 5}
-  	\framesubtitle{Caching f\"ur Lookups in Main}
-  	\sFive
-  	
-  	Starke Verbesserung $\Rightarrow$ \success{beibehalten}.
+  	\framesubtitle{Quadratisches Sondieren}
+  	\textbf{Vorher:}
+		\begin{itemize}
+			\item Cycles: 3,705,108,800 \\
+			\item Instructions: 1,158,823,277\\
+			\item Cache-misses: 37,394,499\\
+			\item Branch mispredictions: 20,203,186\\
+		\end{itemize}	
+				
+		\textbf{Nachher:}
+		\begin{itemize}
+			\item Cycles: 5,948,874,039 (\fail{- 60,56})\\
+			\item Instructions: 2,588,119,362 (\fail{- 123,34})\\
+			\item Cache-misses: 43,166,841 (\fail{- 15,44})\\
+			\item Branch mispredictions: 22,792,713 (\fail{- 12,82})\\
+		\end{itemize}	
+		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
   
+  \begin{frame}
+  	\frametitle{Code: Schritt 5 (1/2)}
+  	\framesubtitle{Quadratisches Sondieren}
+		\sQuadratOne
+  \end{frame}
+  
+  \begin{frame}
+  	\frametitle{Code: Schritt 5 (2/2)}
+  	\framesubtitle{Quadratisches Sondieren}
+		\sQuadratTwo
+  \end{frame}
+      
 \end{document}
