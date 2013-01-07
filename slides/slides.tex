@@ -58,44 +58,129 @@ void insert(char *keyaddr, size_t keylen, int value) {
 \defverbatim[colored]\sQuadratOne{%
 \begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]	
 void insert(char *keyaddr, size_t keylen, int value) {
-    struct hashnode **l;
-    int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
-    int position = startPosition; int i = 0;
-    do {
-        l = &ht[position];
-        position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
-        i++;
-    } while(*l != NULL && position != startPosition);
+	struct hashnode **l;
+  int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
+  int position = startPosition; int i = 0;
+  do {
+  	l = &ht[position];
+    position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
+    i++;
+  } while(*l != NULL && position != startPosition);
 
-    if (*l == NULL) {
-        struct hashnode *n = malloc(sizeof(struct hashnode));
-        n->keyaddr = keyaddr;
-        n->keylen = keylen;
-        n->value = value;
-        *l = n;
-    }
+  if (*l == NULL) {
+  	struct hashnode *n = malloc(sizeof(struct hashnode));
+    n->keyaddr = keyaddr;
+    n->keylen = keylen;
+    n->value = value;
+    *l = n;
+	}
 }
 \end{lstlisting}}	
+	
+	% Memoization
+	\defverbatim[colored]\sMemo{%
+\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily]
+struct cachenode {
+	struct cachenode *next;
+  int value;
+};
+\end{lstlisting}}
+
+	% Memoization Main
+	\defverbatim[colored]\sMemoMain{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily\footnotesize]
+int main(int argc, char *argv[]) {
+	...
+	struct cachenode *first_cn = NULL;
+	struct cachenode *current_cn;
+	...
+	if (i == 0) {
+		currentLookup = lookup(p, nextp - p);
+	  if (first_cn == NULL) {
+	  	first_cn = malloc(sizeof(struct cachenode));
+	    current_cn = first_cn;
+	  } else {
+	  	current_cn->next = malloc(sizeof(struct cachenode));
+	    current_cn = current_cn->next;
+	  }
+	  current_cn->next = NULL;
+	  current_cn->value = currentLookup;
+	} else {
+		currentLookup = current_cn->value;
+	  current_cn = current_cn->next;
+	} ...
+}
+\end{lstlisting}}
+
+	% Memoization dynamisches Array
+	\defverbatim[colored]\sMemoTwo{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily\footnotesize]
+int main(int argc, char *argv[]) {
+	...
+	int currentLookup;
+	int *cache = calloc(HASHSIZE, sizeof(int));
+	int cacheSize = HASHSIZE;
+	int cacheCounter;
+	...
+	if (firstRun) {
+  	currentLookup = lookup(p, nextp - p);
+    if (cacheCounter >= cacheSize) {
+    	realloc(cache, sizeof(int));
+      cacheSize++;
+    }
+    cache[cacheCounter] = currentLookup;
+	} else {
+  	currentLookup = cache[cacheCounter];
+  }
+  r = ((unsigned long)r) * 2654435761L + currentLookup;
+	...
+}
+\end{lstlisting}}
+
+	% Memoization Optimierung Reallokierung
+\defverbatim[colored]\sMemoThree{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily\footnotesize]
+#define CACHE_ALLOC_STEP_SIZE 96
+int main(int argc, char *argv[]) {
+	...
+	int currentLookup; 
+	int *cache = calloc(HASHSIZE, sizeof(int));
+	int cacheSize = HASHSIZE; int cacheCounter;
+	...
+	if (i == 0) {
+		currentLookup = lookup(p, nextp - p);
+	  if (cacheCounter >= cacheSize) {
+	  	cache = realloc(cache, CACHE_ALLOC_STEP_SIZE * sizeof(int));
+	    cacheSize += CACHE_ALLOC_STEP_SIZE;
+	  }
+	  cache[cacheCounter] = currentLookup;
+	} else {
+		currentLookup = cache[cacheCounter];
+	}
+	r = ((unsigned long)r) * 2654435761L + currentLookup;
+	...
+}
+\end{lstlisting}}
 
 \defverbatim[colored]\sQuadratTwo{%
 \begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]	
 int lookup(char *keyaddr, size_t keylen) {
-    int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
-    int position = startPosition;
-    struct hashnode *l;
-    int i = 0;
-    do {
-        l = ht[position];
-        if (l == NULL) {
-            break;
-        }
-        if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
-            return l->value;
-        }
-        position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
-        i++;
-    } while(position != startPosition);
-    return -1;
+	int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
+  int position = startPosition;
+  struct hashnode *l;
+  int i = 0;
+  do {
+  	l = ht[position];
+    if (l == NULL) {
+    	break;
+    }
+    if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
+    	return l->value;
+    }
+    position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
+    i++;
+	} while(position != startPosition);
+  return -1;
 }
 \end{lstlisting}}	
 
@@ -298,5 +383,93 @@ while (l != NULL) {
   	\framesubtitle{Quadratisches Sondieren}
 		\sQuadratTwo
   \end{frame}
+  
+  \begin{frame}
+  	\frametitle{Schritt 6}
+  	\framesubtitle{Memoization}
+  	\textbf{Vorher:}
+		\begin{itemize}
+			\item Cycles: 3,705,108,800 \\
+			\item Instructions: 1,158,823,277\\
+			\item Cache-misses: 37,394,499\\
+			\item Branch mispredictions: 20,203,186\\
+		\end{itemize}		
+				
+		\textbf{Nachher:}
+		\begin{itemize}
+			\item Cycles: 1,223,009,952 (\success{$+ 66,99\%$})\\
+			\item Instructions: 867,096,107 (\success{$+ 25,17\%$})\\
+			\item Cache-misses: 5,077,492 (\success{$+ 86,42\%$})\\
+			\item Branch mispredictions: 7,507,892 (\success{$+ 62,84\%$})\\
+		\end{itemize}	
+		Verbesserung $\Rightarrow$ \success{beibehalten}.
+  \end{frame}    
+  
+  \begin{frame}
+  	\frametitle{Code: Schritt 6}
+  	\framesubtitle{Memoization}
+		\sMemo
+  \end{frame}
+  
+  \begin{frame}
+  	\frametitle{Code: Schritt (2/2)}
+  	\framesubtitle{Memoization}
+  	\sMemoMain
+  \end{frame}
+  
+  \begin{frame}
+  	\frametitle{Schritt 7}
+  	\framesubtitle{Memoization 2 (dynamisches Array)}
+  	\textbf{Vorher:}
+		\begin{itemize}
+			\item Cycles: 1,223,009,952\\
+			\item Instructions: 867,096,107\\
+			\item Cache-misses: 5,077,492\\
+			\item Branch mispredictions: 7,507,892\\
+		\end{itemize}	
+				
+		\textbf{Nachher:}
+		\begin{itemize}
+			\item Cycles: 917,739,423 (\success{$+ 24,96\%$})\\
+			\item Instructions: 702,170,463 (\success{$+ 19,02\%$})\\
+			\item Cache-misses: 4,647,945 (\success{$+ 8,46\%$})\\
+			\item Branch mispredictions: 7,421,590 (\success{$+ 1,15\%$})\\
+		\end{itemize}	
+		Verbesserung $\Rightarrow$ \success{beibehalten}.
+  \end{frame} 
+  
+  \begin{frame}
+  	\frametitle{Code}
+  	\framesubtitle{Memoization 2: dynamisches Array}
+  	\sMemoTwo
+  \end{frame}    
+  
+  \begin{frame}
+  	\frametitle{Schritt 8}
+  	\framesubtitle{Memoization 3 (Optimierung der Reallokierung)}
+  	\textbf{Vorher:}
+		\begin{itemize}
+			\item Cycles: 917,739,423\\
+			\item Instructions: 702,170,463\\
+			\item Cache-misses: 4,647,945\\
+			\item Branch mispredictions: 7,421,590\\
+		\end{itemize}	
+				
+		\textbf{Nachher:}
+		\begin{itemize}
+		%TODO
+			\item Cycles: 879,335,268 (\success{$+ 4,18\%$})\\
+			\item Instructions: 701,589,819 (\success{$+ 0,08\%$})\\
+			\item Cache-misses: 4,651,776 (\fail{$- 0,08\%$})\\
+			\item Branch mispredictions: 7,527,878 (\fail{$- 1,43\%$})\\
+		\end{itemize}	
+		Verbesserung $\Rightarrow$ \success{beibehalten}.
+  \end{frame} 
+  
+  \begin{frame}
+  	\frametitle{Code}
+  	\framesubtitle{Memoization 3 (Optimierung der Reallokierung)}
+  	\sMemoThree
+  \end{frame}  
       
 \end{document}
