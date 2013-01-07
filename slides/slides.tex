@@ -1,5 +1,7 @@
 \documentclass{beamer}
 \usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
 
 \title[Effprog]%(optional, only for long titles)
 {185.190 Effiziente Programme}
@@ -16,12 +18,20 @@ commentstyle=\color{gray},
 columns=fullflexible,
 keepspaces,
 breaklines,
-tabsize=3, 
+tabsize=3,
 showstringspaces=false,
 extendedchars=true}
 
 \newcommand{\success}[1]{\textcolor{green}{#1}}
 \newcommand{\fail}[1]{\textcolor{red}{#1}}
+
+\tikzset{
+  treenode/.style = {align=center, inner sep=3pt, text centered,
+    font=\sffamily},
+  arn_n/.style = {treenode, black, font=\sffamily, text width=5.5em},% arbre rouge noir, noeud noir
+  arn_r/.style = {treenode, red, text width=5.5em, very thick},% arbre rouge noir, noeud rouge
+  arn_x/.style = {treenode, green, text width=5.5em }% arbre rouge noir, nil
+}
 
 \begin{document}
 	% Inlining
@@ -56,7 +66,7 @@ void insert(char *keyaddr, size_t keylen, int value) {
 
 	% Quadratisches Sondieren
 \defverbatim[colored]\sQuadratOne{%
-\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]	
+\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]
 void insert(char *keyaddr, size_t keylen, int value) {
 	struct hashnode **l;
   int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
@@ -75,8 +85,8 @@ void insert(char *keyaddr, size_t keylen, int value) {
     *l = n;
 	}
 }
-\end{lstlisting}}	
-	
+\end{lstlisting}}
+
 	% Memoization
 	\defverbatim[colored]\sMemo{%
 \begin{lstlisting}[tabsize=8,basicstyle=\ttfamily]
@@ -143,7 +153,7 @@ int main(int argc, char *argv[]) {
 #define CACHE_ALLOC_STEP_SIZE 96
 int main(int argc, char *argv[]) {
 	...
-	int currentLookup; 
+	int currentLookup;
 	int *cache = calloc(HASHSIZE, sizeof(int));
 	int cacheSize = HASHSIZE; int cacheCounter;
 	...
@@ -163,7 +173,7 @@ int main(int argc, char *argv[]) {
 \end{lstlisting}}
 
 \defverbatim[colored]\sQuadratTwo{%
-\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]	
+\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]
 int lookup(char *keyaddr, size_t keylen) {
 	int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
   int position = startPosition;
@@ -182,7 +192,7 @@ int lookup(char *keyaddr, size_t keylen) {
 	} while(position != startPosition);
   return -1;
 }
-\end{lstlisting}}	
+\end{lstlisting}}
 
 	% Packed
 	\defverbatim[colored]\sPacked{%
@@ -212,8 +222,8 @@ while (l != NULL) {
 		l = ht[++position];
 	else
 		break;
-}	
-\end{lstlisting}}	
+}
+\end{lstlisting}}
 
 	\begin{frame}
 	\titlepage
@@ -221,7 +231,7 @@ while (l != NULL) {
 
   \begin{frame}
     \frametitle{Ausgangssituation}
-		
+
 	\begin{itemize}
 		\item Testaufruf:
 		\begin{itemize}
@@ -234,7 +244,7 @@ while (l != NULL) {
 			\item Instructions:  1,939,017,297\\
 			\item Cache-misses:  37,721,251\\
 			\item Branch mispredictions: 18,758,092\\
-		\end{itemize}		
+		\end{itemize}
 		\item Testrechner:
 		\begin{itemize}
 			\item Intel Core i5-2520M CPU @ 2.50GHz
@@ -248,7 +258,7 @@ while (l != NULL) {
 		\end{itemize}
 	\end{itemize}
 	\end{frame}
-  
+
   \begin{frame}
   	\frametitle{Schritt 1}
   	gcc -O3 -lm hash.c -o hash\\[1em]
@@ -258,17 +268,17 @@ while (l != NULL) {
 			\item Instructions: 1,939,017,297\\
 			\item Cache-misses: 37,721,251\\
 			\item Branch mispredictions: 18,758,092\\
-		\end{itemize}	
-		
+		\end{itemize}
+
 		\textbf{Nachher:}
   	\begin{itemize}
 			\item Cycles: 3,705,108,800 (\success{$+ 39,82 \%$})\\
 			\item Instructions: 1,158,823,277 (\success{$+ 40,24 \%$})\\
 			\item Cache-misses: 37,394,499 (\success{$+ 0,87 \%$})\\
 			\item Branch mispredictions: 20,203,186 (\fail{$- 7,70 \%$})\\
-		\end{itemize}	
+		\end{itemize}
   \end{frame}
-  
+
   \begin{frame}
   	\frametitle{Schritt 2}
 		\framesubtitle{Inlining}
@@ -278,25 +288,25 @@ while (l != NULL) {
 			\item Instructions: 1,158,823,277\\
 			\item Cache-misses: 37,394,499\\
 			\item Branch mispredictions: 20,203,186\\
-		\end{itemize}	
-				
+		\end{itemize}
+
 		\textbf{Nachher:}
   	\begin{itemize}
 			\item Cycles: 3,995,922,639 (\fail{$- 7,85 \%$})\\
 			\item Instructions:  1,158,154,470 (\success{$+ 0,06 \%$})\\
 			\item Cache-misses: 37,389,502 (\success{$+ 0,01 \%$})\\
 			\item Branch mispredictions: 20,691,809 (\fail{$- 2,42 \%$})\\
-		\end{itemize}			
+		\end{itemize}
 		Keine Verbesserung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
-  
+
     \begin{frame}
   	\frametitle{Code: Schritt 2}
 		\framesubtitle{Inlining}
-		\sInlining	
+		\sInlining
   \end{frame}
-  
-  
+
+
   \begin{frame}
   	\frametitle{Schritt 3}
   	\framesubtitle{Packed}
@@ -306,24 +316,24 @@ while (l != NULL) {
 			\item Instructions: 1,158,823,277\\
 			\item Cache-misses: 37,394,499\\
 			\item Branch mispredictions: 20,203,186\\
-		\end{itemize}	
-		
+		\end{itemize}
+
 		\textbf{Nachher:}
 		\begin{itemize}
 			\item Cycles: 3,760,116,819 (\fail{$- 1,48 \%$})\\
 			\item Instructions: 1,158,688,286 (\success{$+ 0,01\%$})\\
 			\item Cache-misses: 37,372,930 (\success{$+ 0,06 \%$})\\
 			\item Branch mispredictions: 19,799,458 (\success{$+ 2,0\%$})\\
-		\end{itemize}	
+		\end{itemize}
 		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
-  
+
     \begin{frame}
   	\frametitle{Code: Schritt 3}
   	\framesubtitle{Packed}
 		\sPacked
   \end{frame}
-    
+
   \begin{frame}
   	\frametitle{Schritt 4}
   	\framesubtitle{Lineares Sondieren}
@@ -333,24 +343,24 @@ while (l != NULL) {
 			\item Instructions: 1,158,823,277\\
 			\item Cache-misses: 37,394,499\\
 			\item Branch mispredictions: 20,203,186\\
-		\end{itemize}	
-		
+		\end{itemize}
+
 		\textbf{Nachher:}
 		\begin{itemize}
 			\item Cycles: 4,588,844,030 (\fail{$- 23,85 \%$})\\
 			\item Instructions: 1,315,414,647 (\fail{$- 13,51 \%$})\\
 			\item Cache-misses: 58,530,839 (\fail{$- 56,52 \%$})\\
 			\item Branch mispredictions: 25,859,851 (\fail{$- 28,00 \%$})\\
-		\end{itemize}	
+		\end{itemize}
 		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
-  
+
   \begin{frame}
   	\frametitle{Code: Schritt 4}
   	\framesubtitle{Lineares Sondieren}
 		\sLinear
   \end{frame}
-    
+
   \begin{frame}
   	\frametitle{Schritt 5}
   	\framesubtitle{Quadratisches Sondieren}
@@ -360,30 +370,30 @@ while (l != NULL) {
 			\item Instructions: 1,158,823,277\\
 			\item Cache-misses: 37,394,499\\
 			\item Branch mispredictions: 20,203,186\\
-		\end{itemize}	
-				
+		\end{itemize}
+
 		\textbf{Nachher:}
 		\begin{itemize}
 			\item Cycles: 5,948,874,039 (\fail{$- 60,56 \%$})\\
 			\item Instructions: 2,588,119,362 (\fail{$- 123,34 \%$})\\
 			\item Cache-misses: 43,166,841 (\fail{$- 15,44 \%$})\\
 			\item Branch mispredictions: 22,792,713 (\fail{$- 12,82 \%$})\\
-		\end{itemize}	
+		\end{itemize}
 		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
-  
+
   \begin{frame}
   	\frametitle{Code: Schritt 5 (1/2)}
   	\framesubtitle{Quadratisches Sondieren}
 		\sQuadratOne
   \end{frame}
-  
+
   \begin{frame}
   	\frametitle{Code: Schritt 5 (2/2)}
   	\framesubtitle{Quadratisches Sondieren}
 		\sQuadratTwo
   \end{frame}
-  
+
   \begin{frame}
   	\frametitle{Schritt 6}
   	\framesubtitle{Memoization}
@@ -393,30 +403,30 @@ while (l != NULL) {
 			\item Instructions: 1,158,823,277\\
 			\item Cache-misses: 37,394,499\\
 			\item Branch mispredictions: 20,203,186\\
-		\end{itemize}		
-				
+		\end{itemize}
+
 		\textbf{Nachher:}
 		\begin{itemize}
 			\item Cycles: 1,223,009,952 (\success{$+ 66,99\%$})\\
 			\item Instructions: 867,096,107 (\success{$+ 25,17\%$})\\
 			\item Cache-misses: 5,077,492 (\success{$+ 86,42\%$})\\
 			\item Branch mispredictions: 7,507,892 (\success{$+ 62,84\%$})\\
-		\end{itemize}	
+		\end{itemize}
 		Verbesserung $\Rightarrow$ \success{beibehalten}.
-  \end{frame}    
-  
+  \end{frame}
+
   \begin{frame}
   	\frametitle{Code: Schritt 6}
   	\framesubtitle{Memoization}
 		\sMemo
   \end{frame}
-  
+
   \begin{frame}
   	\frametitle{Code: Schritt (2/2)}
   	\framesubtitle{Memoization}
   	\sMemoMain
   \end{frame}
-  
+
   \begin{frame}
   	\frametitle{Schritt 7}
   	\framesubtitle{Memoization 2 (dynamisches Array)}
@@ -426,24 +436,24 @@ while (l != NULL) {
 			\item Instructions: 867,096,107\\
 			\item Cache-misses: 5,077,492\\
 			\item Branch mispredictions: 7,507,892\\
-		\end{itemize}	
-				
+		\end{itemize}
+
 		\textbf{Nachher:}
 		\begin{itemize}
 			\item Cycles: 917,739,423 (\success{$+ 24,96\%$})\\
 			\item Instructions: 702,170,463 (\success{$+ 19,02\%$})\\
 			\item Cache-misses: 4,647,945 (\success{$+ 8,46\%$})\\
 			\item Branch mispredictions: 7,421,590 (\success{$+ 1,15\%$})\\
-		\end{itemize}	
+		\end{itemize}
 		Verbesserung $\Rightarrow$ \success{beibehalten}.
-  \end{frame} 
-  
+  \end{frame}
+
   \begin{frame}
   	\frametitle{Code}
   	\framesubtitle{Memoization 2: dynamisches Array}
   	\sMemoTwo
-  \end{frame}    
-  
+  \end{frame}
+
   \begin{frame}
   	\frametitle{Schritt 8}
   	\framesubtitle{Memoization 3 (Optimierung der Reallokierung)}
@@ -453,8 +463,8 @@ while (l != NULL) {
 			\item Instructions: 702,170,463\\
 			\item Cache-misses: 4,647,945\\
 			\item Branch mispredictions: 7,421,590\\
-		\end{itemize}	
-				
+		\end{itemize}
+
 		\textbf{Nachher:}
 		\begin{itemize}
 		%TODO
@@ -462,14 +472,57 @@ while (l != NULL) {
 			\item Instructions: 701,589,819 (\success{$+ 0,08\%$})\\
 			\item Cache-misses: 4,651,776 (\fail{$- 0,08\%$})\\
 			\item Branch mispredictions: 7,527,878 (\fail{$- 1,43\%$})\\
-		\end{itemize}	
+		\end{itemize}
 		Verbesserung $\Rightarrow$ \success{beibehalten}.
-  \end{frame} 
-  
+  \end{frame}
+
   \begin{frame}
   	\frametitle{Code}
   	\framesubtitle{Memoization 3 (Optimierung der Reallokierung)}
   	\sMemoThree
-  \end{frame}  
-      
+  \end{frame}
+
+\begin{frame}
+\frametitle{\"Ubersicht}
+\begin{center}
+  \begin{tikzpicture}[->,level/.style={sibling distance = 2.3cm,
+  level distance = 1.5cm}]
+    \node [arn_n] {\bfseries Original}
+	child { node [arn_x] {\texttt{gcc -O3}}
+		    child {
+		      node [arn_x] {Memo.~1}
+		      child {
+			 node [arn_x] {Memo.~2}
+			   child {
+			     node[arn_x] {Memo.~3}
+			     edge from parent node [left] {\small \success{$+4\%$}}
+			   }
+			 edge from parent node [left] {\small \success{$+25\%$}}
+		      }
+		      edge from parent node [above left] {\small \success{$+67\%$}}
+		    }
+		    child {
+		      node [arn_r] {Quadr.~Sond.}
+		      edge from parent node [left] {\tiny \fail{$-60\%$}}
+		    }
+		    child {
+		      node [arn_r] {Lin.~Sond.}
+		      edge from parent node [left] {\tiny \fail{$-24\%$}}
+		    }
+		    child {
+		      node [arn_r] {\texttt{packed}}
+		      edge from parent node [left] {\tiny \fail{$-1,5\%$}}
+		    }
+		    child {
+		      node [arn_r] {Inlining}
+		      edge from parent node [right] {\tiny \fail{$-8\%$}}
+		    }
+		    edge from parent node [left] {\small \success{$+39,82\%$}}
+	}
+    ;
+\end{tikzpicture}
+\end{center}
+\end{frame}
+
+
 \end{document}
