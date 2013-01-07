@@ -140,8 +140,8 @@ while (l != NULL) {
 	\begin{itemize}
 		\item Testaufruf:
 		\begin{itemize}
-			\item gcc -lm hash.c -o hash
-      \item perf stat -e cycles,cache-misses,branch-misses,instructions ./hash input input2
+			\item \texttt{gcc -lm hash.c -o hash}
+      \item \texttt{perf stat -e cycles,cache-misses,branch-misses,instructions ./hash input input2}
      \end{itemize}
 		\item Ergebnis:
 		\begin{itemize}
@@ -177,10 +177,10 @@ while (l != NULL) {
 		
 		\textbf{Nachher:}
   	\begin{itemize}
-			\item Cycles: 3,705,108,800 (\success{+ 39,82})\\
-			\item Instructions: 1,158,823,277 (\success{+ 40,24})\\
-			\item Cache-misses: 37,394,499 (\success{+ 0,87})\\
-			\item Branch mispredictions: 20,203,186 (\fail{- 7,70})\\
+			\item Cycles: 3,705,108,800 (\success{$+ 39,82 \%$})\\
+			\item Instructions: 1,158,823,277 (\success{$+ 40,24 \%$})\\
+			\item Cache-misses: 37,394,499 (\success{$+ 0,87 \%$})\\
+			\item Branch mispredictions: 20,203,186 (\fail{$- 7,70 \%$})\\
 		\end{itemize}	
   \end{frame}
   
@@ -197,10 +197,10 @@ while (l != NULL) {
 				
 		\textbf{Nachher:}
   	\begin{itemize}
-			\item Cycles: 3,995,922,639 (\fail{- 7,85})\\
-			\item Instructions:  1,158,154,470 (\success{+ 0,06})\\
-			\item Cache-misses: 37,389,502 (\success{+ 0,01})\\
-			\item Branch mispredictions: 20,691,809 (\fail{- 2,42})\\
+			\item Cycles: 3,995,922,639 (\fail{$- 7,85 \%$})\\
+			\item Instructions:  1,158,154,470 (\success{$+ 0,06 \%$})\\
+			\item Cache-misses: 37,389,502 (\success{$+ 0,01 \%$})\\
+			\item Branch mispredictions: 20,691,809 (\fail{$- 2,42 \%$})\\
 		\end{itemize}			
 		Keine Verbesserung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
@@ -225,10 +225,10 @@ while (l != NULL) {
 		
 		\textbf{Nachher:}
 		\begin{itemize}
-			\item Cycles: 3,760,116,819 (\fail{- 1,48})\\
-			\item Instructions: 1,158,688,286 (\success{+ 0,01})\\
-			\item Cache-misses: 37,372,930 (\success{+ 0,06})\\
-			\item Branch mispredictions: 19,799,458 (\success{+ 2,0})\\
+			\item Cycles: 3,760,116,819 (\fail{$- 1,48 \%$})\\
+			\item Instructions: 1,158,688,286 (\success{$+ 0,01\%$})\\
+			\item Cache-misses: 37,372,930 (\success{$+ 0,06 \%$})\\
+			\item Branch mispredictions: 19,799,458 (\success{$+ 2,0\%$})\\
 		\end{itemize}	
 		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
@@ -252,10 +252,10 @@ while (l != NULL) {
 		
 		\textbf{Nachher:}
 		\begin{itemize}
-			\item Cycles: 4,588,844,030 (\fail{- 23,85})\\
-			\item Instructions: 1,315,414,647 (\fail{- 13,51})\\
-			\item Cache-misses: 58,530,839 (\fail{- 56,52})\\
-			\item Branch mispredictions: 25,859,851 (\fail{- 28,00})\\
+			\item Cycles: 4,588,844,030 (\fail{$- 23,85 \%$})\\
+			\item Instructions: 1,315,414,647 (\fail{$- 13,51 \%$})\\
+			\item Cache-misses: 58,530,839 (\fail{$- 56,52 \%$})\\
+			\item Branch mispredictions: 25,859,851 (\fail{$- 28,00 \%$})\\
 		\end{itemize}	
 		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
@@ -279,10 +279,10 @@ while (l != NULL) {
 				
 		\textbf{Nachher:}
 		\begin{itemize}
-			\item Cycles: 5,948,874,039 (\fail{- 60,56})\\
-			\item Instructions: 2,588,119,362 (\fail{- 123,34})\\
-			\item Cache-misses: 43,166,841 (\fail{- 15,44})\\
-			\item Branch mispredictions: 22,792,713 (\fail{- 12,82})\\
+			\item Cycles: 5,948,874,039 (\fail{$- 60,56 \%$})\\
+			\item Instructions: 2,588,119,362 (\fail{$- 123,34 \%$})\\
+			\item Cache-misses: 43,166,841 (\fail{$- 15,44 \%$})\\
+			\item Branch mispredictions: 22,792,713 (\fail{$- 12,82 \%$})\\
 		\end{itemize}	
 		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
