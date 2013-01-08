@@ -260,14 +260,8 @@ while (l != NULL) {
 	\end{frame}
 
   \begin{frame}
-  	\frametitle{Code: Schritt 2}
-		\framesubtitle{Inlining}
-		\sInlining
-  \end{frame}
-
-  \begin{frame}
   	\frametitle{Schritt 1}
-  	gcc -O3 -lm hash.c -o hash\\[1em]
+  	\texttt{gcc -O3 -lm hash.c -o hash}\\[1em]
   	\textbf{Vorher:}
   	\begin{itemize}
 			\item Cycles: 6,156,600,783\\
@@ -283,6 +277,12 @@ while (l != NULL) {
 			\item Cache-misses: 37,394,499 (\success{$+ 0,87 \%$})\\
 			\item Branch mispredictions: 20,203,186 (\fail{$- 7,70 \%$})\\
 		\end{itemize}
+  \end{frame}
+
+	\begin{frame}
+  	\frametitle{Code: Schritt 2}
+		\framesubtitle{Inlining}
+		\sInlining
   \end{frame}
 
   \begin{frame}
