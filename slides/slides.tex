@@ -66,23 +66,23 @@ void insert(char *keyaddr, size_t keylen, int value) {
 
 	% Quadratisches Sondieren
 \defverbatim[colored]\sQuadratOne{%
-\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily\footnotesize]
 void insert(char *keyaddr, size_t keylen, int value) {
 	struct hashnode **l;
-  int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
-  int position = startPosition; int i = 0;
-  do {
-  	l = &ht[position];
-    position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
-    i++;
-  } while(*l != NULL && position != startPosition);
+	int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
+	int position = startPosition; int i = 0;
+	do {
+		l = &ht[position];
+		position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
+		i++;
+	} while(*l != NULL && position != startPosition);
 
-  if (*l == NULL) {
-  	struct hashnode *n = malloc(sizeof(struct hashnode));
-    n->keyaddr = keyaddr;
-    n->keylen = keylen;
-    n->value = value;
-    *l = n;
+	if (*l == NULL) {
+		struct hashnode *n = malloc(sizeof(struct hashnode));
+		n->keyaddr = keyaddr;
+		n->keylen = keylen;
+		n->value = value;
+		*l = n;
 	}
 }
 \end{lstlisting}}
@@ -92,7 +92,7 @@ void insert(char *keyaddr, size_t keylen, int value) {
 \begin{lstlisting}[tabsize=8,basicstyle=\ttfamily]
 struct cachenode {
 	struct cachenode *next;
-  int value;
+	int value;
 };
 \end{lstlisting}}
 
@@ -132,13 +132,13 @@ int main(int argc, char *argv[]) {
 	int cacheSize = HASHSIZE;
 	int cacheCounter;
 	...
-	if (firstRun) {
+	if (i == 0) {
   	currentLookup = lookup(p, nextp - p);
-    if (cacheCounter >= cacheSize) {
+		if (cacheCounter >= cacheSize) {
     	realloc(cache, sizeof(int));
-      cacheSize++;
-    }
-    cache[cacheCounter] = currentLookup;
+			cacheSize++;
+		}
+		cache[cacheCounter] = currentLookup;
 	} else {
   	currentLookup = cache[cacheCounter];
   }
@@ -159,11 +159,11 @@ int main(int argc, char *argv[]) {
 	...
 	if (i == 0) {
 		currentLookup = lookup(p, nextp - p);
-	  if (cacheCounter >= cacheSize) {
-	  	cache = realloc(cache, CACHE_ALLOC_STEP_SIZE * sizeof(int));
-	    cacheSize += CACHE_ALLOC_STEP_SIZE;
-	  }
-	  cache[cacheCounter] = currentLookup;
+		if (cacheCounter >= cacheSize) {
+			cache = realloc(cache, CACHE_ALLOC_STEP_SIZE * sizeof(int));
+			cacheSize += CACHE_ALLOC_STEP_SIZE;
+		}
+		cache[cacheCounter] = currentLookup;
 	} else {
 		currentLookup = cache[cacheCounter];
 	}
@@ -173,24 +173,24 @@ int main(int argc, char *argv[]) {
 \end{lstlisting}}
 
 \defverbatim[colored]\sQuadratTwo{%
-\begin{lstlisting}[tabsize=8,basicstyle=\ttfamily\footnotesize]
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily\footnotesize]
 int lookup(char *keyaddr, size_t keylen) {
 	int startPosition = hash(keyaddr, keylen) & (HASHSIZE-1);
-  int position = startPosition;
-  struct hashnode *l;
-  int i = 0;
-  do {
-  	l = ht[position];
-    if (l == NULL) {
-    	break;
-    }
-    if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
-    	return l->value;
-    }
-    position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
-    i++;
+	int position = startPosition;
+	struct hashnode *l;
+	int i = 0;
+	do {
+		l = ht[position];
+		if (l == NULL) {
+			break;
+		}
+		if (keylen == l->keylen && memcmp(keyaddr, l->keyaddr, keylen) == 0) {
+			return l->value;
+		}
+		position = (startPosition + (int) pow(-1, i) + (i*i/2)) % HASHSIZE;
+		i++;
 	} while(position != startPosition);
-  return -1;
+	return -1;
 }
 \end{lstlisting}}
 
@@ -260,6 +260,12 @@ while (l != NULL) {
 	\end{frame}
 
   \begin{frame}
+  	\frametitle{Code: Schritt 2}
+		\framesubtitle{Inlining}
+		\sInlining
+  \end{frame}
+
+  \begin{frame}
   	\frametitle{Schritt 1}
   	gcc -O3 -lm hash.c -o hash\\[1em]
   	\textbf{Vorher:}
@@ -300,12 +306,11 @@ while (l != NULL) {
 		Keine Verbesserung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
 
-    \begin{frame}
-  	\frametitle{Code: Schritt 2}
-		\framesubtitle{Inlining}
-		\sInlining
+	\begin{frame}
+  	\frametitle{Code: Schritt 3}
+  	\framesubtitle{Packed}
+		\sPacked
   \end{frame}
-
 
   \begin{frame}
   	\frametitle{Schritt 3}
@@ -328,10 +333,10 @@ while (l != NULL) {
 		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
 
-    \begin{frame}
-  	\frametitle{Code: Schritt 3}
-  	\framesubtitle{Packed}
-		\sPacked
+  \begin{frame}
+  	\frametitle{Code: Schritt 4}
+  	\framesubtitle{Lineares Sondieren}
+		\sLinear
   \end{frame}
 
   \begin{frame}
@@ -354,11 +359,17 @@ while (l != NULL) {
 		\end{itemize}
 		Verschlechterung $\Rightarrow$ \fail{entfernt}.
   \end{frame}
+  
+  \begin{frame}
+  	\frametitle{Code: Schritt 5 (1/2)}
+  	\framesubtitle{Quadratisches Sondieren}
+		\sQuadratOne
+  \end{frame}
 
   \begin{frame}
-  	\frametitle{Code: Schritt 4}
-  	\framesubtitle{Lineares Sondieren}
-		\sLinear
+  	\frametitle{Code: Schritt 5 (2/2)}
+  	\framesubtitle{Quadratisches Sondieren}
+		\sQuadratTwo
   \end{frame}
 
   \begin{frame}
@@ -383,15 +394,15 @@ while (l != NULL) {
   \end{frame}
 
   \begin{frame}
-  	\frametitle{Code: Schritt 5 (1/2)}
-  	\framesubtitle{Quadratisches Sondieren}
-		\sQuadratOne
+  	\frametitle{Code: Schritt 6}
+  	\framesubtitle{Memoization}
+		\sMemo
   \end{frame}
 
   \begin{frame}
-  	\frametitle{Code: Schritt 5 (2/2)}
-  	\framesubtitle{Quadratisches Sondieren}
-		\sQuadratTwo
+  	\frametitle{Code: Schritt 6 (2/2)}
+  	\framesubtitle{Memoization}
+  	\sMemoMain
   \end{frame}
 
   \begin{frame}
@@ -415,16 +426,10 @@ while (l != NULL) {
 		Verbesserung $\Rightarrow$ \success{beibehalten}.
   \end{frame}
 
-  \begin{frame}
-  	\frametitle{Code: Schritt 6}
-  	\framesubtitle{Memoization}
-		\sMemo
-  \end{frame}
-
-  \begin{frame}
-  	\frametitle{Code: Schritt (2/2)}
-  	\framesubtitle{Memoization}
-  	\sMemoMain
+	\begin{frame}
+  	\frametitle{Code: Schritt 7}
+  	\framesubtitle{Memoization 2: dynamisches Array}
+  	\sMemoTwo
   \end{frame}
 
   \begin{frame}
@@ -447,11 +452,11 @@ while (l != NULL) {
 		\end{itemize}
 		Verbesserung $\Rightarrow$ \success{beibehalten}.
   \end{frame}
-
-  \begin{frame}
-  	\frametitle{Code}
-  	\framesubtitle{Memoization 2: dynamisches Array}
-  	\sMemoTwo
+  
+	\begin{frame}
+  	\frametitle{Code: Schritt 8}
+  	\framesubtitle{Memoization 3 (Optimierung der Reallokierung)}
+  	\sMemoThree
   \end{frame}
 
   \begin{frame}
@@ -467,7 +472,6 @@ while (l != NULL) {
 
 		\textbf{Nachher:}
 		\begin{itemize}
-		%TODO
 			\item Cycles: 879,335,268 (\success{$+ 4,18\%$})\\
 			\item Instructions: 701,589,819 (\success{$+ 0,08\%$})\\
 			\item Cache-misses: 4,651,776 (\fail{$- 0,08\%$})\\
@@ -475,13 +479,7 @@ while (l != NULL) {
 		\end{itemize}
 		Verbesserung $\Rightarrow$ \success{beibehalten}.
   \end{frame}
-
-  \begin{frame}
-  	\frametitle{Code}
-  	\framesubtitle{Memoization 3 (Optimierung der Reallokierung)}
-  	\sMemoThree
-  \end{frame}
-
+  
 \begin{frame}
 \frametitle{\"Ubersicht}
 \begin{center}
@@ -517,7 +515,7 @@ while (l != NULL) {
 		      node [arn_r] {Inlining}
 		      edge from parent node [right] {\tiny \fail{$-8\%$}}
 		    }
-		    edge from parent node [left] {\small \success{$+39,82\%$}}
+		    edge from parent node [left] {\small \success{$+40\%$}}
 	}
     ;
 \end{tikzpicture}
