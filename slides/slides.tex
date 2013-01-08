@@ -106,18 +106,18 @@ int main(int argc, char *argv[]) {
 	...
 	if (i == 0) {
 		currentLookup = lookup(p, nextp - p);
-	  if (first_cn == NULL) {
-	  	first_cn = malloc(sizeof(struct cachenode));
-	    current_cn = first_cn;
-	  } else {
-	  	current_cn->next = malloc(sizeof(struct cachenode));
-	    current_cn = current_cn->next;
-	  }
-	  current_cn->next = NULL;
-	  current_cn->value = currentLookup;
+		if (first_cn == NULL) {
+			first_cn = malloc(sizeof(struct cachenode));
+			current_cn = first_cn;
+		} else {
+			current_cn->next = malloc(sizeof(struct cachenode));
+			current_cn = current_cn->next;
+		}
+		current_cn->next = NULL;
+		current_cn->value = currentLookup;
 	} else {
 		currentLookup = current_cn->value;
-	  current_cn = current_cn->next;
+		current_cn = current_cn->next;
 	} ...
 }
 \end{lstlisting}}
@@ -133,16 +133,16 @@ int main(int argc, char *argv[]) {
 	int cacheCounter;
 	...
 	if (i == 0) {
-  	currentLookup = lookup(p, nextp - p);
+		currentLookup = lookup(p, nextp - p);
 		if (cacheCounter >= cacheSize) {
-    	realloc(cache, sizeof(int));
+			realloc(cache, sizeof(int));
 			cacheSize++;
 		}
 		cache[cacheCounter] = currentLookup;
 	} else {
-  	currentLookup = cache[cacheCounter];
-  }
-  r = ((unsigned long)r) * 2654435761L + currentLookup;
+		currentLookup = cache[cacheCounter];
+	}
+	r = ((unsigned long)r) * 2654435761L + currentLookup;
 	...
 }
 \end{lstlisting}}
@@ -394,7 +394,7 @@ while (l != NULL) {
   \end{frame}
 
   \begin{frame}
-  	\frametitle{Code: Schritt 6}
+  	\frametitle{Code: Schritt 6 (1/2)}
   	\framesubtitle{Memoization}
 		\sMemo
   \end{frame}
