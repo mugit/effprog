@@ -1,6 +1,7 @@
 \documentclass{beamer}
 \usepackage{listings}
 \usepackage{tikz}
+\usepackage{mathtools}
 \usetikzlibrary{arrows}
 
 \title[Effprog]%(optional, only for long titles)
@@ -40,6 +41,32 @@ extendedchars=true}
 inline unsigned long hash(char *addr, size_t len);
 inline void insert(char *keyaddr, size_t keylen, int value);
 inline int lookup(char *keyaddr, size_t keylen);
+\end{lstlisting}}
+
+
+	% Main loop
+	\defverbatim[colored]\duploop{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+for (i=0; i<10; i++) {
+	for (p=input2.addr, endp=input2.addr+
+		input2.len; p<endp; ) {
+		nextp=memchr(p, '\n', endp-p);
+		if (nextp == NULL)
+			break;
+		r = ((unsigned long)r) * 2654435761L + lookup(p, nextp-p);
+		r = r + (r>>32);
+		p = nextp+1;	
+	}
+}
+\end{lstlisting}}
+
+
+	% differenzengleichung
+	\defverbatim[colored]\diffgleichung{%
+\begin{lstlisting}[tabsize=4,basicstyle=\ttfamily]
+r = ((unsigned long)r) * 2654435761L + lookup(p, nextp-p);
+r = r + (r>>32);
+
 \end{lstlisting}}
 
 	% Lineares Sondieren
@@ -522,5 +549,68 @@ while (l != NULL) {
 \end{center}
 \end{frame}
 
+
+
+\begin{frame}
+  	\frametitle{Mathematischer Ansatz}
+  	\framesubtitle{Aufl"osung von Schleifen und explizite Darstellung}
+  	\duploop
+		
+
+		Gleiche Berechnung (nur mit anderem Startwert) wird 10 mal durchgef"uhrt.
+\end{frame}
+
+\begin{frame}
+  	\frametitle{Mathematischer Ans"atz}
+  	\framesubtitle{Aufl"osung von Schleifen und explizite Darstellung}
+  	\diffgleichung
+		
+		$x_{n+1} = (x_{n} * 2654435761 + b_{n}) * (1 + \frac{1}{2^{32}})$
+
+
+	Differenzengleichung 1. Ordnung
+\end{frame}
+
+\begin{frame}
+  	\frametitle{Mathematischer Ansatz}
+  	\framesubtitle{Aufl"osung von Schleifen und explizite Darstellung}
+  	\diffgleichung
+		
+		$x_{n+1} = (x_{n} * 2654435761 + b_{n}) * (1 + \frac{1}{2^{32}})$
+
+$x_{0} = 0$
+
+$x_{1} = 0 * 2654435761 + b_{0} + \frac{x_{0}*2654435761 + b_{0}}{2 ^{32}} = b_{0} +  \frac{b_{0}}{2 ^{32}}  $
+
+...
+
+\end{frame}
+
+\begin{frame}
+  	\frametitle{Mathematischer Ansatz}
+  	\framesubtitle{Aufl"osung von Schleifen und explizite Darstellung}
+
+$x_{2} = x_{1} * 2654435761 + b_{1} + \frac{x_{1}*2654435761 + b_{1}}{2^{32}}$
+
+$x_{3} = ((b_{0} +  \frac{b_{0}}{2 ^{32}}) * 2654435761 + b_{1} + \frac{x_{1}*2654435761 + b_{1}}{2^{32}}) * 2654435761 + b_{2} + \frac{((b_{0} +  \frac{b_{0}}{2 ^{32}}) * 2654435761 + b_{1} + \frac{x_{1}*2654435761 + b_{1}}{2^{32}})*2654435761 + b_{2}}{2^{32}}$
+
+...
+
+\end{frame}
+
+\begin{frame}
+  	\frametitle{Mathematischer Ansatz}
+  	\framesubtitle{Allgemeine iterative Berechnung von Differenzialglg. 1 Ordnung}
+	vereinfachtes Beispiel:
+
+	$x_{n+1} = x_{n}* c + b_{n}$
+	
+	$x_{3} = c^3 * x_{0} + c^2 * b_{0} + c^1 * b_{1} + c^0 * b_{2}$
+	$x_{n} = c^n * x_{0} + \sum_{i=0}^{n-1} c^{n-i-1} * b_{i}$
+
+Problematik: man hat eine Potenz mit der \fail{Anzahl an Iterationen} als Hochzahl.
+input2 hat 724129 lines!
+
+\end{frame}
 
 \end{document}
