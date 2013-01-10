@@ -557,18 +557,19 @@ while (l != NULL) {
   	\duploop
 		
 
-		Gleiche Berechnung (nur mit anderem Startwert) wird 10 mal durchgef"uhrt.
+		Gleiche Berechnung (nur mit anderem Startwert) wird 10 mal durchgef\"uhrt.
 \end{frame}
 
 \begin{frame}
   	\frametitle{Mathematischer Ansatz}
   	\framesubtitle{Aufl\"osung von Schleifen und explizite Darstellung}
   	\diffgleichung
-		
-		$x_{n+1} = (x_{n} * 2654435761 + b_{n}) * (1 + \frac{1}{2^{32}})$
+	
+	\begin{block}{Differenzengleichung 1. Ordnung}	
+	$x_{n+1} = (x_{n} * 2654435761 + b_{n}) * (1 + \frac{1}{2^{32}})$
+	\end{block}
 
-
-	Differenzengleichung 1. Ordnung
+	
 \end{frame}
 
 \begin{frame}
@@ -601,15 +602,19 @@ $x_{3} = ((b_{0} +  \frac{b_{0}}{2 ^{32}}) * 2654435761 + b_{1} + \frac{x_{1}*26
 \begin{frame}
   	\frametitle{Mathematischer Ansatz}
   	\framesubtitle{Allgemeine iterative Berechnung von Differenzialglg. 1 Ordnung}
-	vereinfachtes Beispiel:
-
-	$x_{n+1} = x_{n}* c + b_{n}$
+	\begin{block}{vereinfachtes Beispiel:}
 	
+	
+	$x_{n+1} = x_{n}* c + b_{n}$
+
+	$x_{3} = ((x_{0} * c  + b_{0}) * c + b_{1}) * c + b_{2}$
 	$x_{3} = c^3 * x_{0} + c^2 * b_{0} + c^1 * b_{1} + c^0 * b_{2}$
 	$x_{n} = c^n * x_{0} + \sum_{i=0}^{n-1} c^{n-i-1} * b_{i}$
-
-Problematik: man hat eine Potenz mit der \fail{Anzahl an Iterationen} als Hochzahl.
-input2 hat 724129 lines!
+	\end{block}
+	\begin{block}{Problematik:}
+Man hat eine Potenz mit der \fail{Anzahl an Iterationen} als Hochzahl.\\
+Bsp: input2 hat 724129 Zeilen!
+	\end{block}
 
 \end{frame}
 
